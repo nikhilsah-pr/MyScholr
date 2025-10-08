@@ -9,6 +9,12 @@ import { AuthProvider } from "@/contexts/AuthContext";
 import { ProtectedRoute } from "@/components/auth/ProtectedRoute";
 import Index from "./pages/Index";
 import Auth from "./pages/Auth";
+import Profile from "./pages/Profile";
+import DigitalID from "./pages/DigitalID";
+import Courses from "./pages/Courses";
+import Schedule from "./pages/Schedule";
+import Grades from "./pages/Grades";
+import More from "./pages/More";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -29,6 +35,62 @@ const App = () => (
                   element={
                     <ProtectedRoute>
                       <Index />
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path="/profile"
+                  element={
+                    <ProtectedRoute>
+                      <Profile />
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path="/digital-id"
+                  element={
+                    <ProtectedRoute>
+                      <DigitalID />
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path="/academics"
+                  element={
+                    <ProtectedRoute>
+                      <Courses />
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path="/courses"
+                  element={
+                    <ProtectedRoute>
+                      <Courses />
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path="/schedule"
+                  element={
+                    <ProtectedRoute>
+                      <Schedule />
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path="/grades"
+                  element={
+                    <ProtectedRoute>
+                      <Grades />
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path="/more"
+                  element={
+                    <ProtectedRoute>
+                      <More />
                     </ProtectedRoute>
                   }
                 />

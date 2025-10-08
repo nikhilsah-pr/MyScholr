@@ -14,6 +14,248 @@ export type Database = {
   }
   public: {
     Tables: {
+      assignments: {
+        Row: {
+          course_id: string
+          created_at: string
+          description: string | null
+          due_date: string | null
+          id: string
+          status: string
+          title: string
+        }
+        Insert: {
+          course_id: string
+          created_at?: string
+          description?: string | null
+          due_date?: string | null
+          id?: string
+          status?: string
+          title: string
+        }
+        Update: {
+          course_id?: string
+          created_at?: string
+          description?: string | null
+          due_date?: string | null
+          id?: string
+          status?: string
+          title?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "assignments_course_id_fkey"
+            columns: ["course_id"]
+            isOneToOne: false
+            referencedRelation: "courses"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      attendance: {
+        Row: {
+          course_id: string
+          created_at: string
+          date: string
+          id: string
+          notes: string | null
+          status: string
+          user_id: string
+        }
+        Insert: {
+          course_id: string
+          created_at?: string
+          date: string
+          id?: string
+          notes?: string | null
+          status: string
+          user_id: string
+        }
+        Update: {
+          course_id?: string
+          created_at?: string
+          date?: string
+          id?: string
+          notes?: string | null
+          status?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "attendance_course_id_fkey"
+            columns: ["course_id"]
+            isOneToOne: false
+            referencedRelation: "courses"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      courses: {
+        Row: {
+          academic_year: string
+          course_code: string
+          course_name: string
+          created_at: string
+          credits: number
+          description: string | null
+          id: string
+          instructor_email: string | null
+          instructor_name: string | null
+          instructor_phone: string | null
+          location: string | null
+          semester: string
+          status: string
+          syllabus_url: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          academic_year: string
+          course_code: string
+          course_name: string
+          created_at?: string
+          credits?: number
+          description?: string | null
+          id?: string
+          instructor_email?: string | null
+          instructor_name?: string | null
+          instructor_phone?: string | null
+          location?: string | null
+          semester: string
+          status?: string
+          syllabus_url?: string | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          academic_year?: string
+          course_code?: string
+          course_name?: string
+          created_at?: string
+          credits?: number
+          description?: string | null
+          id?: string
+          instructor_email?: string | null
+          instructor_name?: string | null
+          instructor_phone?: string | null
+          location?: string | null
+          semester?: string
+          status?: string
+          syllabus_url?: string | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      documents: {
+        Row: {
+          category: string | null
+          course_id: string | null
+          created_at: string
+          description: string | null
+          file_size: number | null
+          file_type: string | null
+          file_url: string
+          id: string
+          is_verified: boolean | null
+          tags: string[] | null
+          title: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          category?: string | null
+          course_id?: string | null
+          created_at?: string
+          description?: string | null
+          file_size?: number | null
+          file_type?: string | null
+          file_url: string
+          id?: string
+          is_verified?: boolean | null
+          tags?: string[] | null
+          title: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          category?: string | null
+          course_id?: string | null
+          created_at?: string
+          description?: string | null
+          file_size?: number | null
+          file_type?: string | null
+          file_url?: string
+          id?: string
+          is_verified?: boolean | null
+          tags?: string[] | null
+          title?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "documents_course_id_fkey"
+            columns: ["course_id"]
+            isOneToOne: false
+            referencedRelation: "courses"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      grades: {
+        Row: {
+          course_id: string
+          created_at: string
+          date_received: string | null
+          grade_type: string
+          grade_value: number | null
+          id: string
+          letter_grade: string | null
+          max_value: number | null
+          notes: string | null
+          updated_at: string
+          user_id: string
+          weight: number | null
+        }
+        Insert: {
+          course_id: string
+          created_at?: string
+          date_received?: string | null
+          grade_type: string
+          grade_value?: number | null
+          id?: string
+          letter_grade?: string | null
+          max_value?: number | null
+          notes?: string | null
+          updated_at?: string
+          user_id: string
+          weight?: number | null
+        }
+        Update: {
+          course_id?: string
+          created_at?: string
+          date_received?: string | null
+          grade_type?: string
+          grade_value?: number | null
+          id?: string
+          letter_grade?: string | null
+          max_value?: number | null
+          notes?: string | null
+          updated_at?: string
+          user_id?: string
+          weight?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "grades_course_id_fkey"
+            columns: ["course_id"]
+            isOneToOne: false
+            referencedRelation: "courses"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       institutions: {
         Row: {
           created_at: string
@@ -88,6 +330,44 @@ export type Database = {
           },
         ]
       }
+      schedules: {
+        Row: {
+          course_id: string
+          created_at: string
+          day_of_week: number
+          end_time: string
+          id: string
+          location: string | null
+          start_time: string
+        }
+        Insert: {
+          course_id: string
+          created_at?: string
+          day_of_week: number
+          end_time: string
+          id?: string
+          location?: string | null
+          start_time: string
+        }
+        Update: {
+          course_id?: string
+          created_at?: string
+          day_of_week?: number
+          end_time?: string
+          id?: string
+          location?: string | null
+          start_time?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "schedules_course_id_fkey"
+            columns: ["course_id"]
+            isOneToOne: false
+            referencedRelation: "courses"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       user_roles: {
         Row: {
           id: string
@@ -111,6 +391,14 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      calculate_attendance_percentage: {
+        Args: { p_course_id?: string; p_user_id: string }
+        Returns: number
+      }
+      calculate_gpa: {
+        Args: { p_user_id: string }
+        Returns: number
+      }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]

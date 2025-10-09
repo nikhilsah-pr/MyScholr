@@ -30,6 +30,13 @@ const menuItems = [
   },
   {
     icon: FileText,
+    title: "Attendance",
+    description: "Track your class attendance",
+    path: "/attendance",
+    color: "text-green-600",
+  },
+  {
+    icon: FileText,
     title: "Documents",
     description: "Access your academic documents",
     path: "/documents",

@@ -14,6 +14,11 @@ import DigitalID from "./pages/DigitalID";
 import Courses from "./pages/Courses";
 import Schedule from "./pages/Schedule";
 import Grades from "./pages/Grades";
+import Attendance from "./pages/Attendance";
+import Documents from "./pages/Documents";
+import Calendar from "./pages/Calendar";
+import Analytics from "./pages/Analytics";
+import Settings from "./pages/Settings";
 import More from "./pages/More";
 import NotFound from "./pages/NotFound";
 
@@ -83,6 +88,46 @@ const App = () => (
                   element={
                     <ProtectedRoute>
                       <Grades />
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path="/attendance"
+                  element={
+                    <ProtectedRoute>
+                      <Attendance />
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path="/documents"
+                  element={
+                    <ProtectedRoute>
+                      <Documents />
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path="/calendar"
+                  element={
+                    <ProtectedRoute>
+                      <Calendar />
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path="/analytics"
+                  element={
+                    <ProtectedRoute>
+                      <Analytics />
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path="/settings"
+                  element={
+                    <ProtectedRoute>
+                      <Settings />
                     </ProtectedRoute>
                   }
                 />

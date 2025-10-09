@@ -11,6 +11,7 @@ import { LoadingSpinner } from "@/components/ui/loading-spinner";
 import { toast } from "sonner";
 import { User, Bell, Shield, Database, Moon, Sun } from "lucide-react";
 import { useTheme } from "next-themes";
+import { SessionManagement } from "@/components/settings/SessionManagement";
 
 interface Profile {
   full_name: string;
@@ -302,6 +303,9 @@ export default function Settings() {
           <Button variant="outline">Manage Profile Sharing</Button>
         </CardContent>
       </Card>
+
+      {/* Session Management */}
+      <SessionManagement />
 
       {/* Data Management */}
       <Card>

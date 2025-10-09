@@ -12,7 +12,7 @@ import { LoadingSpinner } from "@/components/ui/loading-spinner";
 import { User, Mail, Phone, School, BookOpen } from "lucide-react";
 
 const Profile = () => {
-  const { user } = useAuth();
+  const { user, refreshProfile } = useAuth();
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [profile, setProfile] = useState({
@@ -79,6 +79,9 @@ const Profile = () => {
         .eq("id", user.id);
 
       if (error) throw error;
+
+      // Refresh profile in auth context
+      await refreshProfile();
 
       toast({
         title: "Profile updated",

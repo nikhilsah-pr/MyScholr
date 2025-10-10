@@ -14,10 +14,10 @@ import {
   Search,
   Filter,
   FolderOpen,
-  Upload,
   Trash2,
   ExternalLink,
 } from "lucide-react";
+import UploadDocumentDialog from "@/components/documents/UploadDocumentDialog";
 import {
   Select,
   SelectContent,
@@ -72,6 +72,31 @@ export default function Documents() {
       fetchDocuments();
       fetchCourses();
     }
+  }, [user]);
+
+  // Real-time subscription for documents
+  useEffect(() => {
+    if (!user) return;
+
+    const channel = supabase
+      .channel("documents-changes")
+      .on(
+        "postgres_changes",
+        {
+          event: "*",
+          schema: "public",
+          table: "documents",
+          filter: `user_id=eq.${user.id}`,
+        },
+        () => {
+          fetchDocuments();
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
   }, [user]);
 
   useEffect(() => {
@@ -136,6 +161,15 @@ export default function Documents() {
     if (!documentToDelete) return;
 
     try {
+      const doc = documents.find((d) => d.id === documentToDelete);
+      
+      // Delete from storage if file_url contains the storage path
+      if (doc?.file_url.includes("/storage/v1/object/public/documents/")) {
+        const filePath = doc.file_url.split("/documents/")[1];
+        await supabase.storage.from("documents").remove([filePath]);
+      }
+
+      // Delete from database
       const { error } = await supabase
         .from("documents")
         .delete()
@@ -184,10 +218,7 @@ export default function Documents() {
           <h1 className="text-3xl font-bold">Documents</h1>
           <p className="text-muted-foreground">Manage your academic documents and files</p>
         </div>
-        <Button>
-          <Upload className="mr-2 h-4 w-4" />
-          Upload Document
-        </Button>
+        <UploadDocumentDialog courses={courses} onUploadSuccess={fetchDocuments} />
       </div>
 
       {/* Search and Filter */}

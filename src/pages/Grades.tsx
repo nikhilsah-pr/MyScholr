@@ -17,7 +17,34 @@ const Grades = () => {
   const [courseGrades, setCourseGrades] = useState<any[]>([]);
 
   useEffect(() => {
-    loadGrades();
+    if (user) {
+      loadGrades();
+    }
+  }, [user]);
+
+  // Real-time subscription for grades
+  useEffect(() => {
+    if (!user) return;
+
+    const channel = supabase
+      .channel("grades-changes")
+      .on(
+        "postgres_changes",
+        {
+          event: "*",
+          schema: "public",
+          table: "grades",
+          filter: `user_id=eq.${user.id}`,
+        },
+        () => {
+          loadGrades();
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
   }, [user]);
 
   const loadGrades = async () => {

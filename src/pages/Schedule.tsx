@@ -22,6 +22,30 @@ const Schedule = () => {
     loadSchedules();
   }, [user]);
 
+  // Real-time subscription for schedules
+  useEffect(() => {
+    if (!user) return;
+
+    const channel = supabase
+      .channel("schedules-changes")
+      .on(
+        "postgres_changes",
+        {
+          event: "*",
+          schema: "public",
+          table: "schedules",
+        },
+        () => {
+          loadSchedules();
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [user]);
+
   const loadSchedules = async () => {
     if (!user) return;
     

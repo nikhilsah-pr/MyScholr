@@ -46,6 +46,31 @@ export default function Attendance() {
     }
   }, [user]);
 
+  // Real-time subscription for attendance
+  useEffect(() => {
+    if (!user) return;
+
+    const channel = supabase
+      .channel("attendance-changes")
+      .on(
+        "postgres_changes",
+        {
+          event: "*",
+          schema: "public",
+          table: "attendance",
+          filter: `user_id=eq.${user.id}`,
+        },
+        () => {
+          fetchAttendanceData();
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [user]);
+
   const fetchAttendanceData = async () => {
     try {
       setLoading(true);

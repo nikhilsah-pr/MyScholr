@@ -214,6 +214,7 @@ export type Database = {
           file_url: string
           id: string
           is_verified: boolean | null
+          search_vector: unknown | null
           tags: string[] | null
           title: string
           updated_at: string
@@ -229,6 +230,7 @@ export type Database = {
           file_url: string
           id?: string
           is_verified?: boolean | null
+          search_vector?: unknown | null
           tags?: string[] | null
           title: string
           updated_at?: string
@@ -244,6 +246,7 @@ export type Database = {
           file_url?: string
           id?: string
           is_verified?: boolean | null
+          search_vector?: unknown | null
           tags?: string[] | null
           title?: string
           updated_at?: string
@@ -455,12 +458,49 @@ export type Database = {
         Args: { p_user_id: string }
         Returns: number
       }
+      get_academic_standing: {
+        Args: { p_user_id: string }
+        Returns: {
+          active_courses: number
+          attendance_percentage: number
+          completed_courses: number
+          gpa: number
+          total_credits: number
+        }[]
+      }
+      get_attendance_patterns: {
+        Args: { p_months?: number; p_user_id: string }
+        Returns: {
+          attendance_rate: number
+          total_classes: number
+          week_start: string
+        }[]
+      }
+      get_grade_trends: {
+        Args: { p_months?: number; p_user_id: string }
+        Returns: {
+          average_grade: number
+          month: string
+          total_grades: number
+        }[]
+      }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]
           _user_id: string
         }
         Returns: boolean
+      }
+      search_documents: {
+        Args: { p_query: string; p_user_id: string }
+        Returns: {
+          category: string
+          description: string
+          file_url: string
+          id: string
+          rank: number
+          title: string
+        }[]
       }
     }
     Enums: {

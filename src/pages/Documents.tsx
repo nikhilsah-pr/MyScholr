@@ -136,11 +136,36 @@ export default function Documents() {
     }
   };
 
-  const filterDocuments = () => {
+  const filterDocuments = async () => {
     let filtered = documents;
 
-    // Filter by search query
-    if (searchQuery) {
+    // Use full-text search if query exists
+    if (searchQuery && searchQuery.trim().length > 2) {
+      try {
+        const { data, error } = await supabase
+          .rpc('search_documents', {
+            p_user_id: user?.id,
+            p_query: searchQuery.trim()
+          });
+        
+        if (!error && data) {
+          // Map search results back to full document objects
+          filtered = documents.filter(doc => 
+            data.some((result: any) => result.id === doc.id)
+          );
+        }
+      } catch (error) {
+        console.error('Search error:', error);
+        // Fallback to client-side filtering
+        filtered = filtered.filter(
+          (doc) =>
+            doc.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+            doc.description?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+            doc.tags?.some((tag) => tag.toLowerCase().includes(searchQuery.toLowerCase()))
+        );
+      }
+    } else if (searchQuery) {
+      // For short queries, use client-side filtering
       filtered = filtered.filter(
         (doc) =>
           doc.title.toLowerCase().includes(searchQuery.toLowerCase()) ||

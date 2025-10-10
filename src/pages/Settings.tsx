@@ -105,8 +105,32 @@ export default function Settings() {
     }
   };
 
-  const handleExportData = () => {
-    toast.info("Data export feature coming soon");
+  const handleExportData = async () => {
+    try {
+      const { data, error } = await supabase.functions.invoke('export-data', {
+        body: { format: 'json' },
+        headers: {
+          Authorization: `Bearer ${(await supabase.auth.getSession()).data.session?.access_token}`
+        }
+      });
+
+      if (error) throw error;
+
+      const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `academic-data-${new Date().toISOString().split('T')[0]}.json`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+
+      toast.success("Data exported successfully!");
+    } catch (error: any) {
+      console.error("Error exporting data:", error);
+      toast.error("Failed to export data");
+    }
   };
 
   if (loading) {

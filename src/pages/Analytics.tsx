@@ -2,10 +2,11 @@ import { useEffect, useState } from "react";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
 import { LoadingSpinner } from "@/components/ui/loading-spinner";
 import { toast } from "sonner";
 import { LineChart, Line, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, PieChart, Pie, Cell } from "recharts";
-import { TrendingUp, BookOpen, CheckCircle, Award } from "lucide-react";
+import { TrendingUp, BookOpen, CheckCircle, Award, Sparkles, Download } from "lucide-react";
 
 interface Course {
   id: string;
@@ -31,6 +32,9 @@ export default function Analytics() {
   const [grades, setGrades] = useState<Grade[]>([]);
   const [gradeDistribution, setGradeDistribution] = useState<any[]>([]);
   const [coursePerformance, setCoursePerformance] = useState<any[]>([]);
+  const [aiInsights, setAiInsights] = useState<string | null>(null);
+  const [loadingInsights, setLoadingInsights] = useState(false);
+  const [gradeTrends, setGradeTrends] = useState<any[]>([]);
 
   useEffect(() => {
     if (user) {
@@ -103,11 +107,68 @@ export default function Analytics() {
         };
       });
       setCoursePerformance(performanceData);
+
+      // Fetch grade trends
+      const { data: trendsData, error: trendsError } = await supabase
+        .rpc("get_grade_trends", { p_user_id: user?.id, p_months: 6 });
+      
+      if (!trendsError && trendsData) {
+        setGradeTrends(trendsData);
+      }
     } catch (error: any) {
       console.error("Error fetching analytics:", error);
       toast.error("Failed to load analytics data");
     } finally {
       setLoading(false);
+    }
+  };
+
+  const fetchAIInsights = async () => {
+    try {
+      setLoadingInsights(true);
+      const { data, error } = await supabase.functions.invoke('study-insights', {
+        headers: {
+          Authorization: `Bearer ${(await supabase.auth.getSession()).data.session?.access_token}`
+        }
+      });
+
+      if (error) throw error;
+      setAiInsights(data.insights);
+      toast.success("AI insights generated!");
+    } catch (error: any) {
+      console.error("Error fetching AI insights:", error);
+      toast.error("Failed to generate AI insights");
+    } finally {
+      setLoadingInsights(false);
+    }
+  };
+
+  const handleExportData = async () => {
+    try {
+      const { data, error } = await supabase.functions.invoke('export-data', {
+        body: { format: 'json' },
+        headers: {
+          Authorization: `Bearer ${(await supabase.auth.getSession()).data.session?.access_token}`
+        }
+      });
+
+      if (error) throw error;
+
+      // Create and download file
+      const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `academic-data-${new Date().toISOString().split('T')[0]}.json`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+
+      toast.success("Data exported successfully!");
+    } catch (error: any) {
+      console.error("Error exporting data:", error);
+      toast.error("Failed to export data");
     }
   };
 
@@ -119,9 +180,21 @@ export default function Analytics() {
 
   return (
     <div className="container mx-auto p-4 space-y-6">
-      <div>
-        <h1 className="text-3xl font-bold">Academic Analytics</h1>
-        <p className="text-muted-foreground">Insights into your academic performance</p>
+      <div className="flex justify-between items-start">
+        <div>
+          <h1 className="text-3xl font-bold">Academic Analytics</h1>
+          <p className="text-muted-foreground">Insights into your academic performance</p>
+        </div>
+        <div className="flex gap-2">
+          <Button variant="outline" onClick={handleExportData}>
+            <Download className="mr-2 h-4 w-4" />
+            Export Data
+          </Button>
+          <Button onClick={fetchAIInsights} disabled={loadingInsights}>
+            <Sparkles className="mr-2 h-4 w-4" />
+            {loadingInsights ? "Generating..." : "AI Insights"}
+          </Button>
+        </div>
       </div>
 
       {/* Key Metrics */}
@@ -237,35 +310,51 @@ export default function Analytics() {
         </Card>
       </div>
 
-      {/* AI Insights Placeholder */}
+      {/* Grade Trends */}
+      {gradeTrends.length > 0 && (
+        <Card>
+          <CardHeader>
+            <CardTitle>Grade Trends (Last 6 Months)</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <ResponsiveContainer width="100%" height={300}>
+              <LineChart data={gradeTrends}>
+                <CartesianGrid strokeDasharray="3 3" />
+                <XAxis dataKey="month" />
+                <YAxis domain={[0, 100]} />
+                <Tooltip />
+                <Legend />
+                <Line type="monotone" dataKey="average_grade" stroke="#8884d8" name="Average Grade (%)" />
+              </LineChart>
+            </ResponsiveContainer>
+          </CardContent>
+        </Card>
+      )}
+
+      {/* AI Insights */}
       <Card>
         <CardHeader>
-          <CardTitle>AI-Powered Insights</CardTitle>
+          <CardTitle className="flex items-center gap-2">
+            <Sparkles className="h-5 w-5" />
+            AI-Powered Study Insights
+          </CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="space-y-4">
-            <div className="border-l-4 border-primary pl-4 py-2">
-              <h4 className="font-medium mb-1">Academic Performance</h4>
-              <p className="text-sm text-muted-foreground">
-                Your current GPA of {gpa.toFixed(2)} is {gpa >= 3.5 ? "excellent" : gpa >= 3.0 ? "good" : "needs improvement"}.
-                {gpa < 3.0 && " Consider focusing more time on challenging subjects."}
-              </p>
+          {aiInsights ? (
+            <div className="prose prose-sm max-w-none">
+              <div className="whitespace-pre-wrap text-sm">{aiInsights}</div>
             </div>
-            <div className="border-l-4 border-secondary pl-4 py-2">
-              <h4 className="font-medium mb-1">Attendance Patterns</h4>
-              <p className="text-sm text-muted-foreground">
-                Your attendance rate of {overallAttendance.toFixed(1)}% is {overallAttendance >= 90 ? "excellent" : overallAttendance >= 75 ? "good" : "concerning"}.
-                {overallAttendance < 75 && " Regular attendance is crucial for academic success."}
+          ) : (
+            <div className="text-center py-8">
+              <Sparkles className="h-12 w-12 mx-auto mb-4 text-muted-foreground" />
+              <p className="text-muted-foreground mb-4">
+                Get personalized study recommendations based on your academic performance
               </p>
+              <Button onClick={fetchAIInsights} disabled={loadingInsights}>
+                {loadingInsights ? "Generating..." : "Generate AI Insights"}
+              </Button>
             </div>
-            <div className="border-l-4 border-accent pl-4 py-2">
-              <h4 className="font-medium mb-1">Study Recommendations</h4>
-              <p className="text-sm text-muted-foreground">
-                Based on your performance data, consider allocating more study time to courses with lower grades.
-                Consistent study habits lead to better outcomes.
-              </p>
-            </div>
-          </div>
+          )}
         </CardContent>
       </Card>
     </div>

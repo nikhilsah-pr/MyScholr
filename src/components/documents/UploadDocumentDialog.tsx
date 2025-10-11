@@ -49,6 +49,32 @@ export default function UploadDocumentDialog({
     tags: "",
   });
 
+  const validateTags = (tagsString: string): { valid: boolean; error?: string } => {
+    if (!tagsString.trim()) return { valid: true };
+    
+    if (tagsString.length > 500) {
+      return { valid: false, error: "Tags string is too long (max 500 characters)" };
+    }
+
+    const tagArray = tagsString.split(",").map((tag) => tag.trim()).filter(Boolean);
+    
+    if (tagArray.length > 20) {
+      return { valid: false, error: "Maximum 20 tags allowed" };
+    }
+
+    const invalidTag = tagArray.find((tag) => tag.length > 50);
+    if (invalidTag) {
+      return { valid: false, error: "Each tag must be 50 characters or less" };
+    }
+
+    const invalidChars = tagArray.find((tag) => !/^[a-zA-Z0-9\s\-_]+$/.test(tag));
+    if (invalidChars) {
+      return { valid: false, error: "Tags can only contain letters, numbers, spaces, hyphens, and underscores" };
+    }
+
+    return { valid: true };
+  };
+
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const selectedFile = e.target.files?.[0];
     if (selectedFile) {
@@ -73,6 +99,31 @@ export default function UploadDocumentDialog({
       return;
     }
 
+    // Validate title length
+    if (formData.title.trim().length > 200) {
+      toast.error("Title must be less than 200 characters");
+      return;
+    }
+
+    // Validate description length
+    if (formData.description && formData.description.trim().length > 1000) {
+      toast.error("Description must be less than 1000 characters");
+      return;
+    }
+
+    // Validate category length
+    if (formData.category && formData.category.trim().length > 50) {
+      toast.error("Category must be less than 50 characters");
+      return;
+    }
+
+    // Validate tags
+    const tagsValidation = validateTags(formData.tags);
+    if (!tagsValidation.valid) {
+      toast.error(tagsValidation.error!);
+      return;
+    }
+
     try {
       setUploading(true);
 
@@ -85,12 +136,7 @@ export default function UploadDocumentDialog({
 
       if (uploadError) throw uploadError;
 
-      // Get public URL
-      const { data: urlData } = supabase.storage
-        .from("documents")
-        .getPublicUrl(fileName);
-
-      // Create database record
+      // Create database record with file path (not public URL)
       const tags = formData.tags
         .split(",")
         .map((tag) => tag.trim())
@@ -100,10 +146,10 @@ export default function UploadDocumentDialog({
         user_id: user.id,
         title: formData.title.trim(),
         description: formData.description.trim() || null,
-        file_url: urlData.publicUrl,
+        file_url: fileName, // Store path instead of public URL for better security
         file_type: file.type,
         file_size: file.size,
-        category: formData.category || null,
+        category: formData.category.trim() || null,
         course_id: formData.courseId || null,
         tags: tags.length > 0 ? tags : null,
       });

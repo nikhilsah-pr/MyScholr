@@ -66,6 +66,7 @@ export default function Documents() {
   const [categoryFilter, setCategoryFilter] = useState<string>("all");
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [documentToDelete, setDocumentToDelete] = useState<string | null>(null);
+  const [signedUrls, setSignedUrls] = useState<Record<string, string>>({});
 
   useEffect(() => {
     if (user) {
@@ -101,7 +102,27 @@ export default function Documents() {
 
   useEffect(() => {
     filterDocuments();
+    generateSignedUrls();
   }, [documents, searchQuery, categoryFilter]);
+
+  const generateSignedUrls = async () => {
+    const urls: Record<string, string> = {};
+    for (const doc of documents) {
+      try {
+        // Generate signed URL with 1 hour expiration
+        const { data, error } = await supabase.storage
+          .from('documents')
+          .createSignedUrl(doc.file_url, 3600);
+        
+        if (!error && data) {
+          urls[doc.id] = data.signedUrl;
+        }
+      } catch (error) {
+        console.error('Error generating signed URL for document:', doc.id, error);
+      }
+    }
+    setSignedUrls(urls);
+  };
 
   const fetchDocuments = async () => {
     try {
@@ -188,10 +209,9 @@ export default function Documents() {
     try {
       const doc = documents.find((d) => d.id === documentToDelete);
       
-      // Delete from storage if file_url contains the storage path
-      if (doc?.file_url.includes("/storage/v1/object/public/documents/")) {
-        const filePath = doc.file_url.split("/documents/")[1];
-        await supabase.storage.from("documents").remove([filePath]);
+      // Delete from storage - file_url now contains just the path
+      if (doc?.file_url) {
+        await supabase.storage.from("documents").remove([doc.file_url]);
       }
 
       // Delete from database
@@ -325,14 +345,30 @@ export default function Documents() {
                 <p className="text-xs text-muted-foreground">{formatFileSize(doc.file_size)}</p>
 
                 <div className="flex gap-2 pt-2">
-                  <Button size="sm" variant="outline" className="flex-1" asChild>
-                    <a href={doc.file_url} target="_blank" rel="noopener noreferrer">
+                  <Button 
+                    size="sm" 
+                    variant="outline" 
+                    className="flex-1" 
+                    asChild
+                    disabled={!signedUrls[doc.id]}
+                  >
+                    <a 
+                      href={signedUrls[doc.id] || '#'} 
+                      target="_blank" 
+                      rel="noopener noreferrer"
+                    >
                       <ExternalLink className="mr-2 h-3 w-3" />
                       View
                     </a>
                   </Button>
-                  <Button size="sm" variant="outline" className="flex-1" asChild>
-                    <a href={doc.file_url} download>
+                  <Button 
+                    size="sm" 
+                    variant="outline" 
+                    className="flex-1" 
+                    asChild
+                    disabled={!signedUrls[doc.id]}
+                  >
+                    <a href={signedUrls[doc.id] || '#'} download>
                       <Download className="mr-2 h-3 w-3" />
                       Download
                     </a>

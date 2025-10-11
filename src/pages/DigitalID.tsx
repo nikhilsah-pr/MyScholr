@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { AppLayout } from "@/components/layout/AppLayout";
 import { Container } from "@/components/ui/container";
 import { Card, CardContent } from "@/components/ui/card";
@@ -7,14 +7,16 @@ import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "@/hooks/use-toast";
 import { LoadingSpinner } from "@/components/ui/loading-spinner";
-import { Download, Share2, User } from "lucide-react";
+import { Download, Share2, User, Camera } from "lucide-react";
 import QRCode from "qrcode";
 
 const DigitalID = () => {
   const { user } = useAuth();
   const [loading, setLoading] = useState(true);
+  const [uploading, setUploading] = useState(false);
   const [qrCode, setQrCode] = useState("");
   const [profile, setProfile] = useState<any>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     loadProfile();
@@ -88,6 +90,86 @@ const DigitalID = () => {
     link.click();
   };
 
+  const handleUploadClick = () => {
+    fileInputRef.current?.click();
+  };
+
+  const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file || !user) return;
+
+    // Validate file type
+    if (!file.type.startsWith('image/')) {
+      toast({
+        variant: "destructive",
+        title: "Invalid file",
+        description: "Please upload an image file.",
+      });
+      return;
+    }
+
+    // Validate file size (5MB limit)
+    if (file.size > 5242880) {
+      toast({
+        variant: "destructive",
+        title: "File too large",
+        description: "Please upload an image smaller than 5MB.",
+      });
+      return;
+    }
+
+    try {
+      setUploading(true);
+
+      // Delete old avatar if exists
+      if (profile?.avatar_url) {
+        const oldPath = profile.avatar_url.split('/').pop();
+        if (oldPath) {
+          await supabase.storage.from('avatars').remove([`${user.id}/${oldPath}`]);
+        }
+      }
+
+      // Upload new avatar
+      const fileExt = file.name.split('.').pop();
+      const fileName = `${user.id}/${Date.now()}.${fileExt}`;
+      const { error: uploadError } = await supabase.storage
+        .from('avatars')
+        .upload(fileName, file);
+
+      if (uploadError) throw uploadError;
+
+      // Get public URL
+      const { data: urlData } = supabase.storage
+        .from('avatars')
+        .getPublicUrl(fileName);
+
+      // Update profile with new avatar URL
+      const { error: updateError } = await supabase
+        .from('profiles')
+        .update({ avatar_url: urlData.publicUrl })
+        .eq('id', user.id);
+
+      if (updateError) throw updateError;
+
+      toast({
+        title: "Success",
+        description: "Profile picture updated successfully.",
+      });
+
+      // Reload profile
+      await loadProfile();
+    } catch (error: any) {
+      console.error('Error uploading avatar:', error);
+      toast({
+        variant: "destructive",
+        title: "Upload failed",
+        description: error.message,
+      });
+    } finally {
+      setUploading(false);
+    }
+  };
+
   if (loading) {
     return (
       <AppLayout>
@@ -111,16 +193,38 @@ const DigitalID = () => {
             <div className="h-32 bg-gradient-to-r from-primary to-primary/70" />
             
             <CardContent className="relative -mt-16 space-y-6 p-6">
-              <div className="mx-auto flex h-32 w-32 items-center justify-center rounded-full border-4 border-background bg-muted">
-                {profile?.avatar_url ? (
-                  <img
-                    src={profile.avatar_url}
-                    alt={profile.full_name}
-                    className="h-full w-full rounded-full object-cover"
-                  />
-                ) : (
-                  <User className="h-16 w-16 text-muted-foreground" />
-                )}
+              <div className="relative mx-auto w-32">
+                <div className="flex h-32 w-32 items-center justify-center rounded-full border-4 border-background bg-muted overflow-hidden">
+                  {profile?.avatar_url ? (
+                    <img
+                      src={profile.avatar_url}
+                      alt={profile.full_name}
+                      className="h-full w-full object-cover"
+                    />
+                  ) : (
+                    <User className="h-16 w-16 text-muted-foreground" />
+                  )}
+                </div>
+                <Button
+                  size="icon"
+                  variant="secondary"
+                  className="absolute bottom-0 right-0 h-10 w-10 rounded-full shadow-lg"
+                  onClick={handleUploadClick}
+                  disabled={uploading}
+                >
+                  {uploading ? (
+                    <LoadingSpinner size="sm" />
+                  ) : (
+                    <Camera className="h-5 w-5" />
+                  )}
+                </Button>
+                <input
+                  ref={fileInputRef}
+                  type="file"
+                  accept="image/*"
+                  className="hidden"
+                  onChange={handleFileUpload}
+                />
               </div>
 
               <div className="text-center">

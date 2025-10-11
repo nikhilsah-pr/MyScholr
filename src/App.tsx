@@ -7,6 +7,7 @@ import { ErrorBoundary } from "@/components/ui/error-boundary";
 import { NavigationProvider } from "@/contexts/NavigationContext";
 import { AuthProvider } from "@/contexts/AuthContext";
 import { ProtectedRoute } from "@/components/auth/ProtectedRoute";
+import { InstallPrompt } from "@/components/pwa/InstallPrompt";
 import Index from "./pages/Index";
 import Auth from "./pages/Auth";
 import Profile from "./pages/Profile";
@@ -33,6 +34,7 @@ const App = () => (
         <BrowserRouter>
           <AuthProvider>
             <NavigationProvider>
+              <InstallPrompt />
               <Routes>
                 <Route path="/auth" element={<Auth />} />
                 <Route

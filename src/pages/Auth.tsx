@@ -4,8 +4,8 @@ import { useAuth } from "@/contexts/AuthContext";
 import { LoginForm } from "@/components/auth/LoginForm";
 import { SignupForm } from "@/components/auth/SignupForm";
 import { PasswordResetForm } from "@/components/auth/PasswordResetForm";
-import { GraduationCap } from "lucide-react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import logoImage from "@/assets/logoa.png";
 
 type AuthView = "login" | "signup" | "reset";
 
@@ -28,8 +28,8 @@ const Auth = () => {
     <div className="flex min-h-screen items-center justify-center bg-muted/50 p-4">
       <div className="w-full max-w-md">
         <div className="mb-6 text-center">
-          <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-2xl bg-primary text-primary-foreground">
-            <GraduationCap className="h-8 w-8" />
+          <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center">
+            <img src={logoImage} alt="MyScholr Logo" className="h-16 w-16 object-contain" />
           </div>
           <h1 className="text-3xl font-bold tracking-tight">MyScholr</h1>
           <p className="mt-2 text-muted-foreground">Your digital academic companion</p>

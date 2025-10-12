@@ -137,45 +137,43 @@ const Index = () => {
           </Card>
         </div>
 
-        <div className="mt-6">
-          <Card>
-            <CardHeader>
-              <CardTitle>Quick Actions</CardTitle>
-            </CardHeader>
-            <CardContent className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-              <a
-                href="/digital-id"
-                className="rounded-lg border p-4 text-left transition-colors hover:bg-muted block"
-              >
-                <GraduationCap className="mb-2 h-8 w-8 text-primary" />
-                <h3 className="font-semibold">View Digital ID</h3>
-                <p className="text-sm text-muted-foreground">
-                  Access your student ID card
-                </p>
-              </a>
-              <a
-                href="/schedule"
-                className="rounded-lg border p-4 text-left transition-colors hover:bg-muted block"
-              >
-                <Calendar className="mb-2 h-8 w-8 text-primary" />
-                <h3 className="font-semibold">Check Schedule</h3>
-                <p className="text-sm text-muted-foreground">
-                  View today's classes
-                </p>
-              </a>
-              <a
-                href="/analytics"
-                className="rounded-lg border p-4 text-left transition-colors hover:bg-muted block"
-              >
-                <TrendingUp className="mb-2 h-8 w-8 text-primary" />
-                <h3 className="font-semibold">View Grades</h3>
-                <p className="text-sm text-muted-foreground">
-                  Check your performance
-                </p>
-              </a>
-            </CardContent>
-          </Card>
-        </div>
+        <Card className="mt-6">
+          <CardHeader>
+            <CardTitle>Quick Actions</CardTitle>
+          </CardHeader>
+          <CardContent className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+            <a
+              href="/digital-id"
+              className="rounded-lg border p-4 text-left transition-colors hover:bg-muted block"
+            >
+              <GraduationCap className="mb-2 h-8 w-8 text-primary" />
+              <h3 className="font-semibold">View Digital ID</h3>
+              <p className="text-sm text-muted-foreground">
+                Access your student ID card
+              </p>
+            </a>
+            <a
+              href="/schedule"
+              className="rounded-lg border p-4 text-left transition-colors hover:bg-muted block"
+            >
+              <Calendar className="mb-2 h-8 w-8 text-primary" />
+              <h3 className="font-semibold">Check Schedule</h3>
+              <p className="text-sm text-muted-foreground">
+                View today's classes
+              </p>
+            </a>
+            <a
+              href="/analytics"
+              className="rounded-lg border p-4 text-left transition-colors hover:bg-muted block"
+            >
+              <TrendingUp className="mb-2 h-8 w-8 text-primary" />
+              <h3 className="font-semibold">View Grades</h3>
+              <p className="text-sm text-muted-foreground">
+                Check your performance
+              </p>
+            </a>
+          </CardContent>
+        </Card>
       </Container>
     </AppLayout>
   );

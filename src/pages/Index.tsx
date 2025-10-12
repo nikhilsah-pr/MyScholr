@@ -164,7 +164,7 @@ const Index = () => {
                 </p>
               </button>
               <button
-                onClick={() => (window.location.href = "/grades")}
+                onClick={() => (window.location.href = "/analytics")}
                 className="rounded-lg border p-4 text-left transition-colors hover:bg-muted"
               >
                 <TrendingUp className="mb-2 h-8 w-8 text-primary" />

@@ -1,4 +1,4 @@
-# Welcome to your Lovable project
+# Welcome to My First Vibe Coding project
 
 ## Project info
 
